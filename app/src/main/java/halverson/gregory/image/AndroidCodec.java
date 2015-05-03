@@ -45,6 +45,20 @@ public class AndroidCodec
 
     public static Hash hashFromUriString(String uriString)
     {
+        Bitmap bitmap = ImageLoader.getInstance().loadImageSync(uriString);
+        Hash hash = ImageHash.Average.hashFromBitmap(bitmap);
+        bitmap.recycle();
+        bitmap = null;
+        return hash;
+    }
+
+    public static Hash hashFromFilePathStringWithPrescaling(String filePathString)
+    {
+        return hashFromUriStringWithPrescaling(decodedUriStringFromFilePathString(filePathString));
+    }
+
+    public static Hash hashFromUriStringWithPrescaling(String uriString)
+    {
         // Load bitmap scaled to 8 by 8
         Bitmap bitmap = ImageLoader.getInstance().loadImageSync(uriString, AVERAGE_HASH_SCALED_BITMAP_SIZE, null);
 

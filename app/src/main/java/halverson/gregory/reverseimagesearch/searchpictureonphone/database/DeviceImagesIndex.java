@@ -36,7 +36,7 @@ public class DeviceImagesIndex
     }
 
     // Get collected list of all images on device
-    public ArrayList<String> getCompleteList()
+    public ArrayList<String> getMediaStoreImageFileList()
     {
         ArrayList<String> allImagesPathList = new ArrayList<String>();
 
@@ -109,7 +109,7 @@ public class DeviceImagesIndex
     {
         ArrayList<String> listOfMissingIndices = new ArrayList<String>();
 
-        ArrayList<String> completeList = getCompleteList();
+        ArrayList<String> completeList = getMediaStoreImageFileList();
 
         for (String imageFilePath: completeList)
             if (!indexExists(imageFilePath))
@@ -126,7 +126,7 @@ public class DeviceImagesIndex
         return dataSource.getHash(filePath);
     }
 
-    public Map<String, Hash> getHashTable()
+    public Map<String, ImageProfile> getHashTable()
     {
         return dataSource.getHashTable();
     }

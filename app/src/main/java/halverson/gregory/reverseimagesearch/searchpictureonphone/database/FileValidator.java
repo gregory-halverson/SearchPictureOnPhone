@@ -13,6 +13,16 @@ import java.io.File;
  */
 public class FileValidator
 {
+    public static long getLastModifiedDateFromUriString(String uriString)
+    {
+        return getLastModifiedDateFromFilePathString(Uri.parse(uriString).getPath());
+    }
+
+    public static long getLastModifiedDateFromFilePathString(String filePathString)
+    {
+        return new File(filePathString).lastModified();
+    }
+
     public static boolean checkUri(String uriString, Activity activity)
     {
         ContentResolver cr = activity.getContentResolver();

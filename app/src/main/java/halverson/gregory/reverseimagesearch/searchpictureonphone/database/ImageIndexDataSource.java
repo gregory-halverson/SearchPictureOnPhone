@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -71,38 +72,11 @@ public class ImageIndexDataSource
         return database.insert(ImageIndexSQLiteHelper.TABLE_NAME, null, values);
     }
 
-    public ImageIndexEntry createEntryWithVerify(String imagePathString, Hash averageHash, Long fileModifiedDate)
+    // Delete entry by id
+    public void deleteEntry(int id)
     {
-        ContentValues values = new ContentValues();
-        values.put(ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME, "\'" + imagePathString.replace("\'", "\'\'") + "\'");
-        values.put(ImageIndexSQLiteHelper.AVERAGE_HASH_UPPER_COLUMN_NAME, averageHash.getUpper());
-        values.put(ImageIndexSQLiteHelper.AVERAGE_HASH_LOWER_COLUMN_NAME, averageHash.getLower());
-        values.put(ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME, fileModifiedDate);
-
-        //Log.d(TAG, "values " + values.toString());
-
-        long insertId = database.insert(ImageIndexSQLiteHelper.TABLE_NAME, null, values);
-
-        Cursor cursor = database.query( ImageIndexSQLiteHelper.TABLE_NAME,
-                                        allColumns,
-                                        ImageIndexSQLiteHelper.ID_COLUMN_NAME + " = " + insertId,
-                                        null, null, null, null);
-
-        if (!cursor.moveToFirst())
-            return null;
-
-        ImageIndexEntry newImageIndexEntry = getEntryFromCursor(cursor);
-
-        cursor.close();
-
-        return newImageIndexEntry;
-    }
-
-    public void deleteEntry(ImageIndexEntry imageIndexEntry)
-    {
-        long id = imageIndexEntry.getId();
-        System.out.println("Hash entry deleted with id: " + id);
         database.delete(ImageIndexSQLiteHelper.TABLE_NAME, ImageIndexSQLiteHelper.ID_COLUMN_NAME + " = " + id, null);
+        Log.d(TAG, "Hash entry deleted with id: " + id);
     }
 
     // Returns true if entry containing image uri string exists, false if not
@@ -165,33 +139,11 @@ public class ImageIndexDataSource
         return hash;
     }
 
-    // Returns list of model objects for all records in database
-    public List<ImageIndexEntry> getAllEntries()
-    {
-        List<ImageIndexEntry> hashEntries = new ArrayList<ImageIndexEntry>();
-
-        Cursor cursor = database.query(ImageIndexSQLiteHelper.TABLE_NAME, allColumns, null, null, null, null, null);
-
-        cursor.moveToFirst();
-
-        while (!cursor.isAfterLast())
-        {
-            ImageIndexEntry imageIndexEntry = getEntryFromCursor(cursor);
-            hashEntries.add(imageIndexEntry);
-            cursor.moveToNext();
-        }
-
-        // make sure to close the cursor
-        cursor.close();
-
-        return hashEntries;
-    }
-
     // Returns a map associating file paths with hash objects for all records in database
-    public Map<String, Hash> getHashTable()
+    public Map<String, ImageProfile> getHashTable()
     {
         // Hash table to store queried records
-        Map<String, Hash> hashTable = new HashMap<String, Hash>();
+        Map<String, ImageProfile> hashTable = new HashMap<String, ImageProfile>();
 
         // Query all records into cursor
         Cursor cursor = database.query(ImageIndexSQLiteHelper.TABLE_NAME, allColumns, null, null, null, null, null);
@@ -203,11 +155,7 @@ public class ImageIndexDataSource
         while (!cursor.isAfterLast())
         {
             // Load hash into table
-            hashTable.put(
-                    getFilePathFromCursor(cursor),
-                    new Hash(
-                        getAverageHashUpperFromCursor(cursor),
-                        getAverageHashLowerFromCursor(cursor)));
+            hashTable.put(getFilePathFromCursor(cursor), getProfileFromCursor(cursor));
 
             // Increment cursor to next record
             cursor.moveToNext();
@@ -252,16 +200,13 @@ public class ImageIndexDataSource
         return cursor.getLong(ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NUMBER);
     }
 
-    private static ImageIndexEntry getEntryFromCursor(Cursor cursor)
+    private static ImageProfile getProfileFromCursor(Cursor cursor)
     {
-        // Copy attributes from cursor to model object
-        ImageIndexEntry imageIndexEntry = new ImageIndexEntry();
-        imageIndexEntry.setId(getIdFromCursor(cursor));
-        imageIndexEntry.setImageFilePath(getFilePathFromCursor(cursor));
-        imageIndexEntry.setAverageHashUpper(getAverageHashUpperFromCursor(cursor));
-        imageIndexEntry.setAverageHashLower(getAverageHashLowerFromCursor(cursor));
-        imageIndexEntry.setFileModifiedDate(getFileModifiedDateFromCursor(cursor));
-
-        return imageIndexEntry;
+        return new ImageProfile(
+                getIdFromCursor(cursor),
+                new Hash(
+                        getAverageHashUpperFromCursor(cursor),
+                        getAverageHashLowerFromCursor(cursor)),
+                getFileModifiedDateFromCursor(cursor));
     }
 }

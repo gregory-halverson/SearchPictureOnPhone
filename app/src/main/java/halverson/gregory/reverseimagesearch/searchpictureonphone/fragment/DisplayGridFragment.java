@@ -107,7 +107,7 @@ public class DisplayGridFragment extends Fragment
                 gridview.getAdapter().getItem(position);
                 Intent intent = new Intent(ImageGridActivity.this, ShowImageActivity.class);
                 intent.putExtra("position", position);
-                intent.putExtra("uri", deviceImagesIndex.getCompleteList().get(position));
+                intent.putExtra("uri", deviceImagesIndex.getMediaStoreImageFileList().get(position));
                 startActivity(intent);
             }
         });

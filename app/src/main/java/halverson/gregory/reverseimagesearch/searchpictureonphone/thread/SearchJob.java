@@ -17,6 +17,8 @@ import halverson.gregory.image.AndroidCodec;
 import halverson.gregory.image.hash.Hash;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.database.ImageProfile;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
 
 /**
@@ -63,15 +65,17 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 
         // Load hash table into map
         status("Loading hash table");
-        Map<String, Hash> hashTable = deviceImagesIndex.getHashTable();
+        Map<String, ImageProfile> hashTable = deviceImagesIndex.getHashTable();
 
         // Get hash of target image
         status("Hashing target image");
+        //Hash targetHash = AndroidCodec.hashFromUriStringWithPrescaling(targetUriString);
         Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
+        long targetModifiedDate = FileValidator.getLastModifiedDateFromUriString(targetUriString);
 
         // Get list of image file paths from media store database
         status("Querying media store");
-        //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getCompleteList();
+        //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getMediaStoreImageFileList();
         ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getTestSet();
         int mediaStoreImageFileCount = mediaStorePathStrings.size();
 
@@ -89,17 +93,27 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             String imageFilePath = mediaStorePathStrings.get(i);
 
             // Query hash for queried image
-            Hash queriedHash = hashTable.get(imageFilePath);
+            ImageProfile imageProfile = hashTable.get(imageFilePath);
+
+            Hash queriedHash = null;
 
             // Update database if no hash returned from database
-            if (queriedHash == null)
+            if (imageProfile == null || targetModifiedDate != imageProfile.modifiedDate)
             {
                 // Generate new hash
-                queriedHash = AndroidCodec.hashFromFilePathString(imageFilePath);
+                //queriedHash = AndroidCodec.hashFromFilePathStringWithPrescaling(imageFilePath);
+                Hash generatedHash = AndroidCodec.hashFromFilePathString(imageFilePath);
 
                 // Store successful hash in the database
-                if (queriedHash != null)
-                    deviceImagesIndex.createIndex(imageFilePath, queriedHash);
+                if (generatedHash != null)
+                {
+                    deviceImagesIndex.createIndex(imageFilePath, generatedHash);
+                    queriedHash = generatedHash;
+                }
+            }
+            else
+            {
+                queriedHash = imageProfile.averageHash;
             }
 
             // Make sure hash has been calculated

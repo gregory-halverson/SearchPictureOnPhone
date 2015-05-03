@@ -1,16 +1,20 @@
 package halverson.gregory.reverseimagesearch.searchpictureonphone.database;
 
+import halverson.gregory.image.hash.Hash;
+
 /**
  * Created by Gregory on 5/3/2015.
  */
 public class ImageProfile
 {
+    public long id;
     public long modifiedDate;
-    public String averageHashStringHex;
+    public Hash averageHash;
 
-    public ImageProfile(long modifiedDate, String averageHashStringHex)
+    public ImageProfile(long id, Hash averageHash, long modifiedDate)
     {
+        this.id = id;
         this.modifiedDate = modifiedDate;
-        this.averageHashStringHex = averageHashStringHex;
+        this.averageHash = averageHash;
     }
 }
