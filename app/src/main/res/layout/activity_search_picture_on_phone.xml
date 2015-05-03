@@ -3,5 +3,5 @@
              android:id="@+id/container"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity"
+             tools:context="halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity"
              tools:ignore="MergeRootFrame"/>

@@ -19,13 +19,11 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.Search
 
 public class ImageIndexDataSource
 {
-    // Constants
-
+    // Logcat tag
     private final static String TAG = "ImageIndexDataSource";
 
     // Activity pointer
     Activity activity;
-    SearchOnPhoneWaitingFragment waitingFragment;
 
     // Database fields
 
@@ -41,10 +39,9 @@ public class ImageIndexDataSource
             ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME
     };
 
-    public ImageIndexDataSource(Activity activity, SearchOnPhoneWaitingFragment waitingFragment)
+    public ImageIndexDataSource(Activity activity)
     {
         this.activity = activity;
-        this.waitingFragment = waitingFragment;
         dbHelper = new ImageIndexSQLiteHelper(activity);
     }
 
@@ -104,6 +101,38 @@ public class ImageIndexDataSource
 
         // Return validity of cursor as boolean
         return result;
+    }
+
+    public ImageProfile get(String imageFilePath)
+    {
+        // Generate query
+        File file = new File(imageFilePath);
+        Long fileModifiedDate = file.lastModified();
+        String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=\'" + imageFilePath.replace("\'", "\'\'") + "\'";
+        String fileDateModifiedQuery = ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME +  "=" + fileModifiedDate;
+        String whereQuery = imagePathQuery + " AND " + fileDateModifiedQuery;
+
+        //Log.d(TAG, "checking where " + whereQuery);
+
+        // Execute query
+        Cursor cursor = database.query(
+                ImageIndexSQLiteHelper.TABLE_NAME,
+                allColumns,
+                whereQuery,
+                null, null, null, null);
+
+        // Check if cursor is valid
+        if (!cursor.moveToFirst())
+            return null;
+
+        // Compile hash
+        ImageProfile record = getProfileFromCursor(cursor);
+
+        // Always close the cursor when you're done with the database
+        cursor.close();
+
+        // Return hash object
+        return record;
     }
 
     // Returns hash object from records associated with given file path

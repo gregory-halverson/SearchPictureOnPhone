@@ -28,11 +28,16 @@ public class DeviceImagesIndex
 
     private ArrayList<String> searchResultFilePathStrings = null;
 
-    public DeviceImagesIndex(Activity activity, SearchOnPhoneWaitingFragment waitingFragment)
+    public DeviceImagesIndex(Activity activity)
     {
         this.activity = activity;
-        this.dataSource = new ImageIndexDataSource(this.activity, waitingFragment);
+        this.dataSource = new ImageIndexDataSource(this.activity);
         this.dataSource.open();
+    }
+
+    public ImageProfile get(String filePath)
+    {
+        return dataSource.get(filePath);
     }
 
     // Get collected list of all images on device

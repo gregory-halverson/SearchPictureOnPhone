@@ -15,17 +15,16 @@ import java.util.Map;
 
 import halverson.gregory.image.AndroidCodec;
 import halverson.gregory.image.hash.Hash;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.ImageProfile;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
 
 /**
  * Created by Gregory on 5/2/2015.
  */
 // Asynchronous task for hashing images on phone
-public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
+public class WaitingScreenSearchJob extends AsyncTask<Void, Void, WaitingScreenSearchJob.ReturnCode>
 {
     public static final String TAG = "SearchJob";
 
@@ -37,15 +36,13 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
     }
 
     // Pointers
-    SearchPictureOnPhoneActivity activity;
-    SearchOnPhoneWaitingFragment fragment;
+    WaitingScreenSearchPictureOnPhoneActivity activity;
     String targetUriString;
     TextView statusTextView;
 
-    public SearchJob(SearchPictureOnPhoneActivity activity, SearchOnPhoneWaitingFragment fragment, String targetUriString, TextView statusTextView)
+    public WaitingScreenSearchJob(WaitingScreenSearchPictureOnPhoneActivity activity, String targetUriString, TextView statusTextView)
     {
         this.activity = activity;
-        this.fragment = fragment;
         this.targetUriString = targetUriString;
         this.statusTextView = statusTextView;
     }
@@ -61,7 +58,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 
         // Open database
         status("Opening database");
-        DeviceImagesIndex deviceImagesIndex = activity.openDatabase(fragment);
+        DeviceImagesIndex deviceImagesIndex = activity.openDatabase();
 
         // Load hash table into map
         status("Loading hash table");
@@ -69,7 +66,6 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 
         // Get hash of target image
         status("Hashing target image");
-        //Hash targetHash = AndroidCodec.hashFromUriStringWithPrescaling(targetUriString);
         Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
         long targetModifiedDate = FileValidator.getLastModifiedDateFromUriString(targetUriString);
 
@@ -179,10 +175,11 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             @Override
             public void run()
             {
-                fragment.setStatusText(text);
+                statusTextView.setText(text);
             }
         }
 
+        if (statusTextView != null)
         activity.runOnUiThread(new StatusUpdateRunnable(text));
     }
 

@@ -10,17 +10,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.DisplayGridFragment;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJob;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.WaitingScreenSearchJob;
 
-public class SearchPictureOnPhoneActivity extends ActionBarActivity implements SearchOnPhoneWaitingFragment.OnFragmentInteractionListener
+public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity implements SearchOnPhoneWaitingFragment.OnFragmentInteractionListener
 {
-    public SearchJob hashJob;
+    public WaitingScreenSearchJob hashJob;
 
     // Data
     DeviceImagesIndex deviceImagesIndex;
@@ -37,9 +35,9 @@ public class SearchPictureOnPhoneActivity extends ActionBarActivity implements S
         }
     }
 
-    public DeviceImagesIndex openDatabase(SearchOnPhoneWaitingFragment waitingFragment)
+    public DeviceImagesIndex openDatabase()
     {
-        deviceImagesIndex = new DeviceImagesIndex(this, waitingFragment);
+        deviceImagesIndex = new DeviceImagesIndex(this);
         return deviceImagesIndex;
     }
 

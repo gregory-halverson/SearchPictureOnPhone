@@ -2,7 +2,7 @@ package halverson.gregory.reverseimagesearch.searchpictureonphone.fragment;
 
 import halverson.gregory.image.hash.Hash;
 import halverson.gregory.image.hash.ImageHash;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.adapter.SearchResultsAdapter;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 
@@ -28,7 +28,7 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
 public class DisplayGridFragment extends Fragment
 {
     // Activity
-    SearchPictureOnPhoneActivity activity;
+    WaitingScreenSearchPictureOnPhoneActivity activity;
     //LinearLayout layout;
     View rootView;
 
@@ -46,10 +46,10 @@ public class DisplayGridFragment extends Fragment
     // Load image grid
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        activity = (SearchPictureOnPhoneActivity) super.getActivity();
+        activity = (WaitingScreenSearchPictureOnPhoneActivity) super.getActivity();
         // Replace LinearLayout by the type of the root element of the layout you're trying to load
         //layout    = (LinearLayout)    inflater.inflate(R.layout.activity_main, container, false);
-        rootView = inflater.inflate(R.layout.display_grid, container, false);
+        rootView = inflater.inflate(R.layout.fragment_display_grid, container, false);
 
         // Of course you will want to faActivity and llLayout in the class and not this method to access them in the rest of
         // the class, just initialize them here

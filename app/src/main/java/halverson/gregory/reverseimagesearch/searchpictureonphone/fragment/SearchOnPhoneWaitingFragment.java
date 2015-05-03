@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +12,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJob;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.WaitingScreenSearchJob;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,7 +28,7 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJo
  */
 public class SearchOnPhoneWaitingFragment extends Fragment
 {
-    SearchPictureOnPhoneActivity activity;
+    WaitingScreenSearchPictureOnPhoneActivity activity;
     View view;
 
     TextView statusText;
@@ -83,37 +82,31 @@ public class SearchOnPhoneWaitingFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        try
-        {
-            // Store pointer to activity
-            activity = (SearchPictureOnPhoneActivity) super.getActivity();
+        // Store pointer to activity
+        activity = (WaitingScreenSearchPictureOnPhoneActivity) super.getActivity();
 
-            // Inflate the layout for this fragment
-            view = inflater.inflate(R.layout.fragment_search_on_phone_waiting, container, false);
+        // Inflate the layout for this fragment
+        view = inflater.inflate(R.layout.fragment_search_on_phone_waiting, container, false);
 
-            statusText = (TextView) view.findViewById(R.id.statusText);
+        statusText = (TextView) view.findViewById(R.id.statusText);
 
-            // Load intent
-            Intent intent = activity.getIntent();
-            Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-            String targetUriString = imageUri.toString();
+        // Load intent
+        Intent intent = activity.getIntent();
+        Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        String targetUriString = imageUri.toString();
 
-            // Load image
-            ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
-            Bitmap bitmap = null;
-            bitmap = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), imageUri);
+        // Load image
+        ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
+        //Bitmap bitmap = null;
+        //bitmap = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), imageUri);
+        Bitmap bitmap = ImageLoader.getInstance().loadImageSync(targetUriString);
 
-            // Display image
-            imageView.setImageBitmap(bitmap);
+        // Display image
+        imageView.setImageBitmap(bitmap);
 
-            // Hash images on phone
-            activity.hashJob = new SearchJob(activity, this, targetUriString, statusText);
-            activity.hashJob.execute();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        // Hash images on phone
+        activity.hashJob = new WaitingScreenSearchJob(activity, targetUriString, statusText);
+        activity.hashJob.execute();
 
         return view;
     }
