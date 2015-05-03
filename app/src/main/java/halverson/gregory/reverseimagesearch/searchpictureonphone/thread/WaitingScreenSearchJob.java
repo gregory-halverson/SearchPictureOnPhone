@@ -67,7 +67,7 @@ public class WaitingScreenSearchJob extends AsyncTask<Void, Void, WaitingScreenS
         // Get hash of target image
         status("Hashing target image");
         Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
-        long targetModifiedDate = FileValidator.getLastModifiedDateFromUriString(targetUriString);
+        long targetModifiedDate = FileValidator.getLastModifiedDateUri(targetUriString);
 
         // Get list of image file paths from media store database
         status("Querying media store");

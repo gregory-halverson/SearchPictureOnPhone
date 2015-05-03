@@ -180,8 +180,13 @@ public class ImageIndexDataSource
         // Check if cursor is still valid
         while (!cursor.isAfterLast())
         {
+            String imageFilePath = getFilePathFromCursor(cursor);
+
+            if (imageFilePath.charAt(0) == '\'' && imageFilePath.endsWith("\'"))
+                imageFilePath = imageFilePath.substring(1, imageFilePath.length() - 1);
+
             // Load hash into table
-            hashTable.put(getFilePathFromCursor(cursor), getProfileFromCursor(cursor));
+            hashTable.put(imageFilePath, getProfileFromCursor(cursor));
 
             // Increment cursor to next record
             cursor.moveToNext();

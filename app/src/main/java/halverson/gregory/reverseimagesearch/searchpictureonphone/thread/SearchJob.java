@@ -64,82 +64,69 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
         // Load hash table into map
         status("Loading hash table");
         Map<String, ImageProfile> hashTable = deviceImagesIndex.getHashTable();
+        int hashTableSize = hashTable.size();
 
         // Get hash of target image
         status("Hashing target image");
         Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
-        long targetModifiedDate = FileValidator.getLastModifiedDateFromUriString(targetUriString);
-
+        long targetModifiedDate = FileValidator.getLastModifiedDateUri(targetUriString);
+/*
         // Get list of image file paths from media store database
         status("Querying media store");
         //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getMediaStoreImageFileList();
         ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getTestSet();
         int mediaStoreImageFileCount = mediaStorePathStrings.size();
-
+*/
         boolean gridFragmentDisplayed = false;
 
-        // Loop through all images on device
-        for (int i = 0; i < mediaStoreImageFileCount; i++)
+        int i = 0;
+
+        // Loop through all hashes in database
+        for (String imageFilePath: hashTable.keySet())
         {
             // Check if thread is cancelled
             if (isCancelled())
                 return ReturnCode.SEARCH_CANCELLED;
 
             // Report progress to waiting fragment
-            status("Searching " + i + " of " + mediaStoreImageFileCount);
+            status("Searching " + i++ + " of " + hashTableSize);
 
-            // Get path of queried image;
-            String imageFilePath = mediaStorePathStrings.get(i);
+            // Skip if file doesn't exist
+            if (!FileValidator.checkFilePath(imageFilePath))
+                continue;
 
             // Query hash for queried image
             ImageProfile imageProfile = hashTable.get(imageFilePath);
 
-            Hash queriedHash = null;
+            // Skip if hash is out of date
+            if (imageProfile.modifiedDate != FileValidator.getLastModifiedDatePath(imageFilePath))
+                continue;
 
-            // Update database if no hash returned from database
-            if (imageProfile == null || targetModifiedDate != imageProfile.modifiedDate)
+            // Calculate hamming distance between target image and queried image
+            int hammingDistance = Hash.hammingDistance(targetHash, imageProfile.averageHash);
+            //Log.d(TAG, "hamming(" + targetHash.toHexString() + ", " + imageProfile.averageHash.toHexString() + "): " + hammingDistance + " for " + imageFilePath);
+
+            // Include in search results if the hamming distance is less than the cutoff
+            if (hammingDistance < DeviceImagesIndex.AVERAGE_HAMMING_DISTANCE_CUTOFF)
             {
-                // Generate new hash
-                //queriedHash = AndroidCodec.hashFromFilePathStringWithPrescaling(imageFilePath);
-                Hash generatedHash = AndroidCodec.hashFromFilePathString(imageFilePath);
+                // Add to hamming distances
+                hammingDistances.put(imageFilePath, hammingDistance);
 
-                // Store successful hash in the database
-                if (generatedHash != null)
-                {
-                    deviceImagesIndex.createIndex(imageFilePath, generatedHash);
-                    queriedHash = generatedHash;
-                }
-            }
-            else
-            {
-                queriedHash = imageProfile.averageHash;
-            }
+                // Sort results by hamming distance
+                deviceImagesIndex.setSearchResultsList(sortSearchResults(hammingDistances));
 
-            // Make sure hash has been calculated
-            if (queriedHash != null)
-            {
-                // Calculate hamming distance between target image and queried image
-                int hammingDistance = Hash.hammingDistance(targetHash, queriedHash);
-                Log.d(TAG, "hamming(" + targetHash.toHexString() + ", " + queriedHash.toHexString() + "): " + hammingDistance + " for " + imageFilePath);
-
-                // Include in search results if the hamming distance is less than the cutoff
-                if (hammingDistance < DeviceImagesIndex.AVERAGE_HAMMING_DISTANCE_CUTOFF)
-                {
-                    hammingDistances.put(imageFilePath, hammingDistance);
-                    deviceImagesIndex.setSearchResultsList(sortSearchResults(hammingDistances));
-
-                    if (gridFragmentDisplayed)
-                        notifyAdapter();
-                    else
-                        activity.displayGridFragment();
-                }
+                // Display results
+                if (gridFragmentDisplayed)
+                    notifyAdapter();
+                else
+                    activity.displayGridFragment();
             }
         }
-
+/*
         // Sort search results ascending by hamming distance
         ArrayList<String> searchResults = sortSearchResults(hammingDistances);
         deviceImagesIndex.setSearchResultsList(searchResults);
-
+*/
         // Check if no images were found
         if (deviceImagesIndex.getImageCount() == 0)
             return ReturnCode.NO_IMAGES_FOUND;

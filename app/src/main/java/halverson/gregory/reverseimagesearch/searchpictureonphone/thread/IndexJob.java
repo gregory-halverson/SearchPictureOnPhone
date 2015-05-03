@@ -73,7 +73,7 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
 
             // Get path of queried image;
             String imageFilePath = mediaStorePathStrings.get(i);
-            long targetModifiedDate = FileValidator.getLastModifiedDateFromUriString(imageFilePath);
+            long targetModifiedDate = FileValidator.getLastModifiedDateUri(imageFilePath);
 
             // Query hash for queried image
             ImageProfile imageProfile = deviceImagesIndex.get(imageFilePath);

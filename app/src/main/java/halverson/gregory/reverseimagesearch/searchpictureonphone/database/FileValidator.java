@@ -13,12 +13,12 @@ import java.io.File;
  */
 public class FileValidator
 {
-    public static long getLastModifiedDateFromUriString(String uriString)
+    public static long getLastModifiedDateUri(String uriString)
     {
-        return getLastModifiedDateFromFilePathString(Uri.parse(uriString).getPath());
+        return getLastModifiedDatePath(Uri.parse(uriString).getPath());
     }
 
-    public static long getLastModifiedDateFromFilePathString(String filePathString)
+    public static long getLastModifiedDatePath(String filePathString)
     {
         return new File(filePathString).lastModified();
     }
