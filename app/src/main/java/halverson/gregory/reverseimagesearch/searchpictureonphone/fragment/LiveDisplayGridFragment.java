@@ -12,16 +12,19 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.LiveSearchImageOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.adapter.SearchResultsAdapter;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 
 // Image grid activity
-public class DisplayGridFragment extends Fragment
+public class LiveDisplayGridFragment extends Fragment
 {
     // Activity
-    WaitingScreenSearchPictureOnPhoneActivity activity;
+    LiveSearchImageOnPhoneActivity activity;
     View rootView;
+
+    GridView gridView;
 
     // Image loader
     DisplayImageOptions options;
@@ -29,14 +32,14 @@ public class DisplayGridFragment extends Fragment
 
     SearchResultsAdapter searchResultsAdapter;
 
-    public DisplayGridFragment() { }
+    public LiveDisplayGridFragment() { }
 
     // Load image grid
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        activity = (WaitingScreenSearchPictureOnPhoneActivity) super.getActivity();
-        rootView = inflater.inflate(R.layout.fragment_display_grid, container, false);
+        activity = (LiveSearchImageOnPhoneActivity) super.getActivity();
+        rootView = inflater.inflate(R.layout.fragment_live_display_grid, container, false);
 
         // Instantiate image loader
         imageLoader = ImageLoader.getInstance();
@@ -54,7 +57,7 @@ public class DisplayGridFragment extends Fragment
                 .build();
 
         // Get handle of image grid
-        final GridView gridview = (GridView) rootView.findViewById(R.id.gridview);
+        gridView = (GridView) rootView.findViewById(R.id.liveGridView);
 
         // Get pointer to image index
         DeviceImagesIndex deviceImagesIndex = activity.getDeviceImagesIndex();
@@ -62,7 +65,7 @@ public class DisplayGridFragment extends Fragment
         this.searchResultsAdapter = new SearchResultsAdapter(activity, imageLoader, options, deviceImagesIndex);
 
         // Set adapter for image grid data
-        gridview.setAdapter(this.searchResultsAdapter);
+        gridView.setAdapter(this.searchResultsAdapter);
         deviceImagesIndex.setAdapter(this.searchResultsAdapter);
 /*
         // Set listener for pressing image in grid

@@ -21,12 +21,12 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.WaitingS
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link SearchOnPhoneWaitingFragment.OnFragmentInteractionListener} interface
+ * {@link WaitingScreenFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link SearchOnPhoneWaitingFragment#newInstance} factory method to
+ * Use the {@link WaitingScreenFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SearchOnPhoneWaitingFragment extends Fragment
+public class WaitingScreenFragment extends Fragment
 {
     WaitingScreenSearchPictureOnPhoneActivity activity;
     View view;
@@ -53,9 +53,9 @@ public class SearchOnPhoneWaitingFragment extends Fragment
      * @return A new instance of fragment SearchOnPhoneWaitingFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SearchOnPhoneWaitingFragment newInstance(String param1, String param2)
+    public static WaitingScreenFragment newInstance(String param1, String param2)
     {
-        SearchOnPhoneWaitingFragment fragment = new SearchOnPhoneWaitingFragment();
+        WaitingScreenFragment fragment = new WaitingScreenFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -63,7 +63,7 @@ public class SearchOnPhoneWaitingFragment extends Fragment
         return fragment;
     }
 
-    public SearchOnPhoneWaitingFragment()
+    public WaitingScreenFragment()
     {
         // Required empty public constructor
     }
@@ -86,7 +86,7 @@ public class SearchOnPhoneWaitingFragment extends Fragment
         activity = (WaitingScreenSearchPictureOnPhoneActivity) super.getActivity();
 
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_search_on_phone_waiting, container, false);
+        view = inflater.inflate(R.layout.fragment_waiting_screen, container, false);
 
         statusText = (TextView) view.findViewById(R.id.statusText);
 

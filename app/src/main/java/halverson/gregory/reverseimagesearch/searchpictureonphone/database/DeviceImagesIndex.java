@@ -12,7 +12,6 @@ import java.util.Map;
 
 import halverson.gregory.image.hash.Hash;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.adapter.SearchResultsAdapter;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
 
 /**
  * Created by Gregory on 4/20/2015.
@@ -33,6 +32,7 @@ public class DeviceImagesIndex
         this.activity = activity;
         this.dataSource = new ImageIndexDataSource(this.activity);
         this.dataSource.open();
+        this.searchResultFilePathStrings = new ArrayList<String>();
     }
 
     public ImageProfile get(String filePath)
@@ -176,6 +176,17 @@ public class DeviceImagesIndex
     public ImageIndexDataSource getDataSource()
     {
         return dataSource;
+    }
+
+    public void notifyAdapter()
+    {
+        if (searchResultsAdapter != null)
+            searchResultsAdapter.notifyDataSetChanged();
+    }
+
+    public void attachSearchResultsAdapter(SearchResultsAdapter searchResultsAdapter)
+    {
+        this.searchResultsAdapter = searchResultsAdapter;
     }
 
     // Get attached display adapter

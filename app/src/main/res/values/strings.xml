@@ -5,11 +5,11 @@
     <string name="action_settings">Settings</string>
 
     <color name="black">#000000</color>
-    <string name="title_activity_search_picture_on_phone">Search Picture On Phone</string>
+    <string name="title_activity_search_picture_on_phone">Search Picture On Phone (Wait Screen)</string>
     <string name="hello_world">Hello world!</string>
 
-<!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_update_index">Update Index</string>
+    <string name="title_activity_live_search_image_on_phone">Search Image on Phone</string>
 
 </resources>

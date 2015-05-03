@@ -14,21 +14,27 @@
         <activity
             android:name=".activity.WaitingScreenSearchPictureOnPhoneActivity"
             android:label="@string/title_activity_search_picture_on_phone" >
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activity.UpdateIndexActivity"
             android:label="@string/title_activity_update_index" >
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activity.LiveSearchImageOnPhoneActivity"
+            android:label="@string/title_activity_live_search_image_on_phone" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
     </application>

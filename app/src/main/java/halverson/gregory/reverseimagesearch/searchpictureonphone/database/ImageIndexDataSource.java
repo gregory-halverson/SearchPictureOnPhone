@@ -9,13 +9,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import halverson.gregory.image.hash.Hash;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
 
 public class ImageIndexDataSource
 {

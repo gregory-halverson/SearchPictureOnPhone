@@ -34,6 +34,7 @@ public class SearchResultsAdapter extends BaseAdapter
         this.imageLoader = imageLoader;
         this.options = options;
         this.deviceImagesIndex = deviceImagesIndex;
+        deviceImagesIndex.setAdapter(this);
     }
 
     // Get number of items to show in list

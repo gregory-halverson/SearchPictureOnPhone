@@ -1,6 +1,5 @@
 package halverson.gregory.reverseimagesearch.searchpictureonphone.activity;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -8,13 +7,13 @@ import android.view.MenuItem;
 
 import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.DisplayGridFragment;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.WaitingScreenFragment;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.WaitingScreenSearchJob;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.LiveDisplayGridFragment;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.LiveWaitingScreenFragment;
+import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJob;
 
-public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity implements WaitingScreenFragment.OnFragmentInteractionListener
+public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 {
-    public WaitingScreenSearchJob hashJob;
+    public SearchJob searchJob;
 
     // Data
     DeviceImagesIndex deviceImagesIndex;
@@ -23,7 +22,7 @@ public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_waiting_screen);
+        setContentView(R.layout.activity_live_search_image_on_phone);
 
         if (savedInstanceState == null)
         {
@@ -37,15 +36,10 @@ public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity
         return deviceImagesIndex;
     }
 
-    public void onFragmentInteraction(Uri uri)
-    {
-
-    }
-
     @Override
     public void onBackPressed()
     {
-        hashJob.cancel(true);
+        searchJob.cancel(true);
 
         super.onBackPressed();
     }
@@ -53,7 +47,7 @@ public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity
     public void searchOnPhoneWaitingFragment()
     {
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new WaitingScreenFragment())
+                .add(R.id.container, new LiveWaitingScreenFragment())
                 .commit();
     }
 
@@ -61,7 +55,7 @@ public class WaitingScreenSearchPictureOnPhoneActivity extends ActionBarActivity
     {
         getSupportFragmentManager().beginTransaction()
                 //.add(R.id.container, new DisplayGridFragment())
-                .replace(R.id.container, new DisplayGridFragment())
+                .replace(R.id.container, new LiveDisplayGridFragment())
                 .commit();
     }
 
