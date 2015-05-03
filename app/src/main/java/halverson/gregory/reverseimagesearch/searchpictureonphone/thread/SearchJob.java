@@ -1,19 +1,11 @@
 package halverson.gregory.reverseimagesearch.searchpictureonphone.thread;
 
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,20 +15,24 @@ import java.util.Map;
 
 import halverson.gregory.image.AndroidCodec;
 import halverson.gregory.image.hash.Hash;
-import halverson.gregory.image.hash.ImageHash;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.SearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.database.ImageProfile;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.fragment.SearchOnPhoneWaitingFragment;
 
 /**
  * Created by Gregory on 5/2/2015.
  */
 // Asynchronous task for hashing images on phone
-public class SearchJob extends AsyncTask<Void, Void, Integer>
+public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 {
     public static final String TAG = "SearchJob";
+
+    public static enum ReturnCode
+    {
+        SEARCH_COMPLETED_WITH_NO_ERROR,
+        NO_IMAGES_FOUND,
+        SEARCH_CANCELLED
+    }
 
     // Pointers
     SearchPictureOnPhoneActivity activity;
@@ -53,176 +49,65 @@ public class SearchJob extends AsyncTask<Void, Void, Integer>
     }
 
     @Override
-    protected Integer doInBackground(Void [] args)
+    protected ReturnCode doInBackground(Void [] args)
     {
-        String imageFilePath = "";
-        String queriedHashString = "";
+        // Map of hamming distances to store unsorted search results
         Map<String, Integer> hammingDistances = new HashMap<String, Integer>();
-        ArrayList<String> searchResults = new ArrayList<String>();
 
-        // Scaled image size
-        ImageSize imageSize = new ImageSize(8, 8);
+        // Get pointer to image loader
+        ImageLoader imageLoader = ImageLoader.getInstance();
 
         // Open database
         status("Opening database");
         DeviceImagesIndex deviceImagesIndex = activity.openDatabase(fragment);
 
+        // Load hash table into map
         status("Loading hash table");
         Map<String, Hash> hashTable = deviceImagesIndex.getHashTable();
 
         // Get hash of target image
         status("Hashing target image");
-        //Bitmap bitmap = ImageLoader.getInstance().loadImageSync(targetUriString);
-        Bitmap bitmap = ImageLoader.getInstance().loadImageSync(targetUriString, imageSize, null);
+        Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
 
-        //Hash targetHash = ImageHash.Average.hashFromBitmap(bitmap);
-        Hash targetHash = AndroidCodec.hashFrom8by8Bitmap(bitmap);
-        String targetHashString = targetHash.toHexString();
-        targetHash = null;
-
-        bitmap.recycle();
-        bitmap = null;
-/*
-        // Media store query
-        final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
-        final String orderBy = MediaStore.Images.Media._ID;
-
-        //Stores all the images from the gallery in Cursor
-        Cursor mediaCursor = activity.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
-*/
-
+        // Get list of image file paths from media store database
         status("Querying media store");
-        ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getCompleteList();
-        int count = mediaStorePathStrings.size();
-
-/*
-        //Total number of images
-        int count = mediaCursor.getCount();
-
-        // Column index for file path of images in media store
-        int columnIndex = mediaCursor.getColumnIndex(MediaStore.Images.Media.DATA);
-*/
-
-        /*
-        // Progress timer
-        long startTime = System.nanoTime();
-        long currentTime = System.nanoTime();
-        float elapsedSeconds = 0;
-        float averageOperationTime = 0;
-        int estimatedSeconds = 0;
-        String timeRemaining = "";
-        */
+        //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getCompleteList();
+        ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getTestSet();
+        int mediaStoreImageFileCount = mediaStorePathStrings.size();
 
         // Loop through all images on device
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < mediaStoreImageFileCount; i++)
         {
-            /*
-            // Check status of thread every 10 iterations
-            if (i % 10 == 0 && i > 0)
-            {
-                // Check if thread is cancelled
-                if (isCancelled())
-                {
-                    mediaCursor.close();
-                    return 2;
-                }
-
-                // Update progress
-                currentTime = System.nanoTime();
-                elapsedSeconds = (currentTime - startTime) / 1000000000.0f;
-                averageOperationTime = elapsedSeconds / i;
-                estimatedSeconds = (int) (averageOperationTime * (count - i));
-                timeRemaining = " (" + (estimatedSeconds / 60) + ":" + String.format("%02d", estimatedSeconds % 60) + "s left)";
-            }
-            */
-
             // Check if thread is cancelled
             if (isCancelled())
-            {
-                //mediaCursor.close();
-                return 2;
-            }
+                return ReturnCode.SEARCH_CANCELLED;
 
-            //status("Searching " + i + " of " + count + timeRemaining);
-            status("Searching " + i + " of " + count);
+            // Report progress to waiting fragment
+            status("Searching " + i + " of " + mediaStoreImageFileCount);
 
-            // Get path of queried image
-            //mediaCursor.moveToPosition(i);
-            //imageFilePath = mediaCursor.getString(columnIndex);
-            imageFilePath = mediaStorePathStrings.get(i);
-/*
-            // Validate path
-            if (!FileValidator.checkFilePath(imageFilePath))
-            {
-                Log.d(TAG, imageFilePath + " not available");
+            // Get path of queried image;
+            String imageFilePath = mediaStorePathStrings.get(i);
 
-                continue;
-            }
-*/
             // Query hash for queried image
-            //Hash queriedHash = deviceImagesIndex.getHash(imageFilePath);
-            //String queriedHashString = deviceImagesIndex.getHashString(imageFilePath);
             Hash queriedHash = hashTable.get(imageFilePath);
 
+            // Update database if no hash returned from database
             if (queriedHash == null)
             {
-                // Load bitmap for queried image
-                //bitmap = ImageLoader.getInstance().loadImageSync(Uri.decode(Uri.fromFile(new File(imageFilePath)).toString()));
+                // Generate new hash
+                queriedHash = AndroidCodec.hashFromFilePathString(imageFilePath);
 
-                // Load 8 by 8 bitmap for queried image
-                bitmap = ImageLoader.getInstance().loadImageSync(Uri.decode(Uri.fromFile(new File(imageFilePath)).toString()), imageSize, null);
-
-                // Make sure the bitmap was loaded
-                if (bitmap != null)
-                {
-                    // Get hash for queried file
-                    //queriedHash = ImageHash.Average.hashFromBitmap(bitmap);
-                    queriedHash = AndroidCodec.hashFrom8by8Bitmap(bitmap);
-                    queriedHashString = queriedHash.toHexString();
-                    bitmap.recycle();
-                    bitmap = null;
-
-                    // Store hash in the database
+                // Store successful hash in the database
+                if (queriedHash != null)
                     deviceImagesIndex.createIndex(imageFilePath, queriedHash);
-                }
             }
-            else
-            {
-                queriedHashString = queriedHash.toHexString();
-            }
-/*
-            // Update database if no hash returned from database
-            //if (queriedHash == null)
-            if (queriedHashString == null)
-            {
-                // Load bitmap for queried image
-                //bitmap = ImageLoader.getInstance().loadImageSync(Uri.decode(Uri.fromFile(new File(imageFilePath)).toString()));
 
-                // Load 8 by 8 bitmap for queried image
-                bitmap = ImageLoader.getInstance().loadImageSync(Uri.decode(Uri.fromFile(new File(imageFilePath)).toString()), imageSize, null);
-
-                // Make sure the bitmap was loaded
-                if (bitmap != null)
-                {
-                    // Get hash for queried file
-                    //queriedHash = ImageHash.Average.hashFromBitmap(bitmap);
-                    Hash queriedHash = AndroidCodec.hashFrom8by8Bitmap(bitmap);
-                    queriedHashString = queriedHash.toHexString();
-                    bitmap.recycle();
-                    bitmap = null;
-
-                    // Store hash in the database
-                    deviceImagesIndex.createIndex(imageFilePath, queriedHash);
-                }
-            }
-*/
             // Make sure hash has been calculated
-            //if (queriedHash != null)
-            if (queriedHashString != null)
+            if (queriedHash != null)
             {
                 // Calculate hamming distance between target image and queried image
-                //int hammingDistance = Hash.hammingDistance(targetHash, queriedHash);
-                int hammingDistance = Hash.hammingDistanceFromStrings(targetHashString, queriedHashString);
+                int hammingDistance = Hash.hammingDistance(targetHash, queriedHash);
+                Log.d(TAG, "hamming(" + targetHash.toHexString() + ", " + queriedHash.toHexString() + "): " + hammingDistance + " for " + imageFilePath);
 
                 // Include in search results if the hamming distance is less than the cutoff
                 if (hammingDistance < DeviceImagesIndex.AVERAGE_HAMMING_DISTANCE_CUTOFF)
@@ -230,10 +115,20 @@ public class SearchJob extends AsyncTask<Void, Void, Integer>
             }
         }
 
-        // Close the cursor for the media store database
-        //mediaCursor.close();
-
         // Sort search results ascending by hamming distance
+        ArrayList<String> searchResults = sortSearchResults(hammingDistances);
+        deviceImagesIndex.setSearchResultsList(searchResults);
+
+        // Check if no images were found
+        if (deviceImagesIndex.getImageCount() == 0)
+            return ReturnCode.NO_IMAGES_FOUND;
+
+        return ReturnCode.SEARCH_COMPLETED_WITH_NO_ERROR;
+    }
+
+    private static ArrayList<String> sortSearchResults(Map<String, Integer> hammingDistances)
+    {
+        ArrayList<String> searchResults = new ArrayList<String>();
 
         List<Map.Entry<String, Integer>> sortableHammingDistances = new ArrayList<Map.Entry<String, Integer>>();
 
@@ -251,12 +146,7 @@ public class SearchJob extends AsyncTask<Void, Void, Integer>
         for (Map.Entry<String, Integer> entry: sortableHammingDistances)
             searchResults.add(entry.getKey());
 
-        deviceImagesIndex.setSearchResultsList(searchResults);
-
-        if (deviceImagesIndex.getImageCount() == 0)
-            return 1;
-
-        return 0;
+        return searchResults;
     }
 
     // Report progress to UI thread
@@ -282,19 +172,28 @@ public class SearchJob extends AsyncTask<Void, Void, Integer>
         activity.runOnUiThread(new StatusUpdateRunnable(text));
     }
 
-    // Close splash screen after hash has been fetched and browser intent sent
+    // Cleanup after search
     @Override
-    protected void onPostExecute(Integer result)
+    protected void onPostExecute(ReturnCode result)
     {
-        if (result == 0)
-            activity.displayGridFragment();
-        else if (result == 1)
-            status("No similar images found on device");
-        else if (result == 2)
+        switch (result)
         {
-            Log.d(TAG, "Search job cancelled");
-            ImageLoader.getInstance().clearMemoryCache();
-            ImageLoader.getInstance().clearDiskCache();
+            // Close splash screen after hash has been fetched and browser intent sent
+            case SEARCH_COMPLETED_WITH_NO_ERROR:
+                activity.displayGridFragment();
+                break;
+
+            // Report that no images were found
+            case NO_IMAGES_FOUND:
+                status("No similar images found on device");
+                break;
+
+            // Clear memory
+            case SEARCH_CANCELLED:
+                Log.d(TAG, "Search job cancelled");
+                ImageLoader.getInstance().clearMemoryCache();
+                ImageLoader.getInstance().clearDiskCache();
+                break;
         }
     }
 }

@@ -16,6 +16,17 @@ public class Hash
         this.lower = 0;
     }
 
+    public Hash(int upper, int lower)
+    {
+        this.upper = upper;
+        this.lower = lower;
+    }
+
+    public Hash(long value)
+    {
+        fromLong(value);
+    }
+
     public Hash(String hex)
     {
         parseHex(hex);
@@ -51,6 +62,16 @@ public class Hash
         value = value - ((value >> 1) & 0x55555555);
         value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
         return (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+    }
+
+    public int getUpper()
+    {
+        return upper;
+    }
+
+    public int getLower()
+    {
+        return lower;
     }
 
     public int hammingWeight()
@@ -135,7 +156,13 @@ public class Hash
 
     public long toLong()
     {
-        return ((long)upper << 32) | ((long)lower & 0xFFFFFFFL);
+        return ((long)upper << 32) | ((long)lower & 0xFFFFFFFFL);
+    }
+
+    public void fromLong(long value)
+    {
+        lower = (int)(value & 0xFFFFFFFFL);
+        upper = (int)(value >> 32);
     }
 
     public static String paddedIntBinaryString(int value)
@@ -167,7 +194,7 @@ public class Hash
         return toHexString();
     }
 
-    static HashMap<Character, Byte> hexValues = new HashMap<Character, Byte>() {{
+    public static HashMap<Character, Byte> hexValues = new HashMap<Character, Byte>() {{
         put( Character.valueOf( '0' ), Byte.valueOf( (byte )0 ));
         put( Character.valueOf( '1' ), Byte.valueOf( (byte )1 ));
         put( Character.valueOf( '2' ), Byte.valueOf( (byte )2 ));

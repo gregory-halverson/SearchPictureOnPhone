@@ -1,6 +1,12 @@
 package halverson.gregory.image;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+
+import java.io.File;
 
 import halverson.gregory.image.hash.Hash;
 import halverson.gregory.image.hash.ImageHash;
@@ -10,6 +16,9 @@ import halverson.gregory.image.hash.ImageHash;
  */
 public class AndroidCodec
 {
+    // Scaled image size
+    public static final ImageSize AVERAGE_HASH_SCALED_BITMAP_SIZE = new ImageSize(8, 8);
+
     public static int[][] grayMatrixFrom8by8Bitmap(Bitmap bitmap)
     {
         int[][] matrix = new int[8][8];
@@ -29,8 +38,36 @@ public class AndroidCodec
         return matrix;
     }
 
+    public static Hash hashFromFilePathString(String filePathString)
+    {
+        return hashFromUriString(decodedUriStringFromFilePathString(filePathString));
+    }
+
+    public static Hash hashFromUriString(String uriString)
+    {
+        // Load bitmap scaled to 8 by 8
+        Bitmap bitmap = ImageLoader.getInstance().loadImageSync(uriString, AVERAGE_HASH_SCALED_BITMAP_SIZE, null);
+
+        if (bitmap == null)
+            return null;
+
+        // Return hash of 8 by 8 bitmap
+        Hash hash = AndroidCodec.hashFrom8by8Bitmap(bitmap);
+
+        // Recycle bitmap
+        bitmap.recycle();
+        bitmap = null;
+
+        return hash;
+    }
+
     public static Hash hashFrom8by8Bitmap(Bitmap bitmap)
     {
         return ImageHash.Average.hashFromGray8by8Matrix(grayMatrixFrom8by8Bitmap(bitmap));
+    }
+
+    public static String decodedUriStringFromFilePathString(String filePathString)
+    {
+        return Uri.decode(Uri.fromFile(new File(filePathString)).toString());
     }
 }

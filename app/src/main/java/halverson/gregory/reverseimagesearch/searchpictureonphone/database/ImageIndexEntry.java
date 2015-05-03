@@ -4,8 +4,9 @@ public class ImageIndexEntry
 {
     private long id;
     private String imageFilePath;
-    private String averageHashHex;
-    private Long fileModifiedDate;
+    private int averageHashUpper;
+    private int averageHashLower;
+    private long fileModifiedDate;
 
     public long getId() {
         return id;
@@ -23,14 +24,24 @@ public class ImageIndexEntry
         this.imageFilePath = imageFilePath;
     }
 
-    public String getAverageHashHex()
+    public int getAverageHashUpper()
     {
-        return averageHashHex;
+        return averageHashUpper;
     }
 
-    public void setAverageHashHex(String averageHashHex)
+    public void setAverageHashUpper(int averageHashUpper)
     {
-        this.averageHashHex = averageHashHex;
+        this.averageHashUpper = averageHashUpper;
+    }
+
+    public int getAverageHashLower()
+    {
+        return averageHashLower;
+    }
+
+    public void setAverageHashLower(int averageHashLower)
+    {
+        this.averageHashLower = averageHashLower;
     }
 
     public Long getFileModifiedDate()
