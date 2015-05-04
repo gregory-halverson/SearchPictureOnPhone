@@ -48,6 +48,11 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
         this.statusTextView = statusTextView;
     }
 
+    public void attachStatusTextView(TextView statusTextView)
+    {
+        this.statusTextView = statusTextView;
+    }
+
     @Override
     protected ReturnCode doInBackground(Void [] args)
     {
@@ -79,7 +84,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 */
         boolean gridFragmentDisplayed = false;
 
-        int i = 0;
+        int i = 1;
 
         // Loop through all hashes in database
         for (String imageFilePath: hashTable.keySet())
@@ -122,11 +127,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
                     activity.displayGridFragment();
             }
         }
-/*
-        // Sort search results ascending by hamming distance
-        ArrayList<String> searchResults = sortSearchResults(hammingDistances);
-        deviceImagesIndex.setSearchResultsList(searchResults);
-*/
+
         // Check if no images were found
         if (deviceImagesIndex.getImageCount() == 0)
             return ReturnCode.NO_IMAGES_FOUND;
@@ -173,6 +174,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             @Override
             public void run()
             {
+                Log.d(TAG, "setting status " + text);
                 statusTextView.setText(text);
             }
         }
@@ -212,6 +214,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             // Close splash screen after hash has been fetched and browser intent sent
             case SEARCH_COMPLETED_WITH_NO_ERROR:
                 //activity.displayGridFragment();
+                activity.hideStatusBar();
                 break;
 
             // Report that no images were found

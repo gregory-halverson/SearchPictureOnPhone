@@ -13,6 +13,10 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJo
 
 public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 {
+    // Fragment
+    LiveDisplayGridFragment gridFragment;
+
+    // Thread
     public SearchJob searchJob;
 
     // Data
@@ -23,6 +27,8 @@ public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_search_image_on_phone);
+
+        gridFragment = new LiveDisplayGridFragment();
 
         if (savedInstanceState == null)
         {
@@ -53,10 +59,21 @@ public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 
     public void displayGridFragment()
     {
+        /*
         getSupportFragmentManager().beginTransaction()
                 //.add(R.id.container, new DisplayGridFragment())
                 .replace(R.id.container, new LiveDisplayGridFragment())
                 .commit();
+        */
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, gridFragment)
+                .commit();
+    }
+
+    public void hideStatusBar()
+    {
+        gridFragment.hideStatusBar();
     }
 
     public DeviceImagesIndex getDeviceImagesIndex()

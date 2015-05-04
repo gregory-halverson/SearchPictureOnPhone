@@ -1,17 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="match_parent">
-    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/liveGridView"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:columnWidth="90dp"
-              android:gravity="center"
-              android:horizontalSpacing="5dp"
-              android:numColumns="auto_fit"
-              android:stretchMode="columnWidth"
-              android:verticalSpacing="5dp"
-              android:padding="5dp"
-              android:color="@color/black"/>
-</FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/statusBar">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Searching"
+            android:id="@+id/liveGridStatusText"
+            android:layout_gravity="top|center_horizontal"
+            android:visibility="visible"
+            android:textColor="#FFFFFFFF"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/statusBar">
+
+        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:id="@+id/liveGridView"
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:columnWidth="90dp"
+                  android:gravity="center"
+                  android:horizontalSpacing="5dp"
+                  android:numColumns="auto_fit"
+                  android:stretchMode="columnWidth"
+                  android:verticalSpacing="5dp"
+                  android:padding="5dp"
+                  android:color="@color/black"
+                  android:layout_alignParentLeft="true"
+                  android:layout_marginLeft="0dp"
+                  android:layout_alignParentTop="true"
+                  android:layout_marginTop="0dp"/>
+    </FrameLayout>
+
+</RelativeLayout>

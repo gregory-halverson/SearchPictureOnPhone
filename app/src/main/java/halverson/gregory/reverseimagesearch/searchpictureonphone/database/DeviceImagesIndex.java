@@ -135,12 +135,7 @@ public class DeviceImagesIndex
     {
         return dataSource.getHashTable();
     }
-/*
-    public String getHashString(String filePath)
-    {
-        return dataSource.getHashString(filePath);
-    }
-*/
+
     public boolean indexExists(String imageFilePath)
     {
         File file = new File(imageFilePath);

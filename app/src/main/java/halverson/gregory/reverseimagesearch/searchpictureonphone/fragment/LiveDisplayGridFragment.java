@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -22,9 +24,12 @@ public class LiveDisplayGridFragment extends Fragment
 {
     // Activity
     LiveSearchImageOnPhoneActivity activity;
-    View rootView;
 
+    // View
+    View rootView;
     GridView gridView;
+    TextView statusTextView;
+    LinearLayout statusBar;
 
     // Image loader
     DisplayImageOptions options;
@@ -33,6 +38,11 @@ public class LiveDisplayGridFragment extends Fragment
     SearchResultsAdapter searchResultsAdapter;
 
     public LiveDisplayGridFragment() { }
+
+    public void hideStatusBar()
+    {
+        statusBar.setVisibility(View.INVISIBLE);
+    }
 
     // Load image grid
     @Override
@@ -58,6 +68,12 @@ public class LiveDisplayGridFragment extends Fragment
 
         // Get handle of image grid
         gridView = (GridView) rootView.findViewById(R.id.liveGridView);
+
+        // Get pointer to status text view
+        statusTextView = (TextView) rootView.findViewById(R.id.liveGridStatusText);
+        activity.searchJob.attachStatusTextView(statusTextView);
+
+        statusBar = (LinearLayout) rootView.findViewById(R.id.statusBar);
 
         // Get pointer to image index
         DeviceImagesIndex deviceImagesIndex = activity.getDeviceImagesIndex();
