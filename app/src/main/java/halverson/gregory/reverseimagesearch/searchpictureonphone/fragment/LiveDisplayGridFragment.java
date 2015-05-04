@@ -15,7 +15,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import halverson.gregory.reverseimagesearch.searchpictureonphone.R;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.LiveSearchImageOnPhoneActivity;
-import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.WaitingScreenSearchPictureOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.adapter.SearchResultsAdapter;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 

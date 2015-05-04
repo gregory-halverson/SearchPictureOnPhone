@@ -19,6 +19,7 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.Update
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.ImageProfile;
+import halverson.gregory.utilities.ProgressStopwatch;
 
 // Asynchronous task for hashing images on phone
 public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
@@ -56,10 +57,14 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
         DeviceImagesIndex deviceImagesIndex = activity.openDatabase();
 
         // Get list of image file paths from media store database
-        setStatus("Querying media store");
+        setStatus("Looking for new images");
+        ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getListOfMissingIndices();
         //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getMediaStoreImageFileList();
-        ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getTestSet();
+        //ArrayList<String> mediaStorePathStrings = deviceImagesIndex.getTestSet();
         int mediaStoreImageFileCount = mediaStorePathStrings.size();
+
+        ProgressStopwatch stopwatch = new ProgressStopwatch();
+        String estimatedMinutesSeconds = "";
 
         // Loop through all images on device
         for (int i = 0; i < mediaStoreImageFileCount; i++)
@@ -69,7 +74,7 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
                 return ReturnCode.INDEX_CANCELLED;
 
             // Report progress to waiting fragment
-            setStatus("Indexing " + i + " of " + mediaStoreImageFileCount);
+            setStatus("Indexing " + i + " of " + mediaStoreImageFileCount + estimatedMinutesSeconds);
 
             // Get path of queried image;
             String imageFilePath = mediaStorePathStrings.get(i);
@@ -81,16 +86,28 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
             // Update database if no hash returned from database
             if (imageProfile == null || targetModifiedDate != imageProfile.modifiedDate)
             {
-                // Generate new hash
-                //Hash generatedHash = AndroidCodec.hashFromFilePathString(imageFilePath);
+                // Load bitmap to for hashing and indexing
                 Bitmap bitmap = imageLoader.loadImageSync(AndroidCodec.decodedUriStringFromFilePathString(imageFilePath));
+
+                // Make sure bitmap loaded
+                if (bitmap == null)
+                {
+                    Log.d(TAG, "unable to load " + imageFilePath);
+                    continue;
+                }
+
+                // Display picture being indexed
                 setImage(bitmap);
+
+                // Generate new hash
                 Hash generatedHash = ImageHash.Average.hashFromBitmap(bitmap);
 
                 // Store successful hash in the database
                 if (generatedHash != null)
                     deviceImagesIndex.createIndex(imageFilePath, generatedHash);
             }
+
+            estimatedMinutesSeconds = " (" + stopwatch.estimateMinutesSeconds(i, mediaStoreImageFileCount) + " left)";
         }
 
         return ReturnCode.INDEX_COMPLETED_WITH_NO_ERROR;

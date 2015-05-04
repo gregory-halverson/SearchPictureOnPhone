@@ -134,10 +134,11 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 
         // Search of previously indexed images complete, update database
 
-        status("Looking for new pictures");
+        status("Looking for new images");
 
         // List of missing indices
-        ArrayList<String> missingIndices = deviceImagesIndex.getListOfMissingIndicesTestSet();
+        //ArrayList<String> missingIndices = deviceImagesIndex.getListOfMissingIndicesTestSet();
+        ArrayList<String> missingIndices = deviceImagesIndex.getListOfMissingIndices();
         int missingIndicesCount = missingIndices.size();
         int missingIndicesIterator = 1;
 
@@ -151,8 +152,17 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             // Report progress to waiting fragment
             status("Indexing " + missingIndicesIterator++ + " of " + missingIndicesCount);
 
-            // Generate new hash
+            // Load bitmap to be hashed and indexed
             Bitmap bitmap = imageLoader.loadImageSync(AndroidCodec.decodedUriStringFromFilePathString(imageFilePath));
+
+            // Make sure bitmap loaded
+            if (bitmap == null)
+            {
+                Log.d(TAG, "unable to load " + imageFilePath);
+                continue;
+            }
+
+            // Generate new hash
             Hash generatedHash = ImageHash.Average.hashFromBitmap(bitmap);
 
             // Store successful hash in the database
