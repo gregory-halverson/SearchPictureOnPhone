@@ -66,9 +66,13 @@ public class UpdateIndexActivity extends ActionBarActivity
     @Override
     public void onBackPressed()
     {
+        // Cancel indexing engine
         indexJob.cancel(true);
 
         super.onBackPressed();
+
+        // Make sure activity closes on back button
+        finish();
     }
 
     @Override

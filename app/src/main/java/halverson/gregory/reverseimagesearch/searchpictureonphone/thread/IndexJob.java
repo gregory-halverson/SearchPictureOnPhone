@@ -53,7 +53,7 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
         ImageLoader imageLoader = ImageLoader.getInstance();
 
         // Open database
-        setStatus("Opening database");
+        setStatus("Loading");
         DeviceImagesIndex deviceImagesIndex = activity.openDatabase();
 
         // Get list of image file paths from media store database
@@ -174,7 +174,7 @@ public class IndexJob extends AsyncTask<Void, Void, IndexJob.ReturnCode>
 
             // Clear memory
             case INDEX_CANCELLED:
-                Log.d(TAG, "Search job cancelled");
+                Log.d(TAG, "Index job cancelled");
                 ImageLoader.getInstance().clearMemoryCache();
                 ImageLoader.getInstance().clearDiskCache();
                 break;

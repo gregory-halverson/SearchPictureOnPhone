@@ -23,6 +23,7 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.LiveSe
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.ImageProfile;
+import halverson.gregory.utilities.ProgressStopwatch;
 
 /**
  * Created by Gregory on 5/2/2015.
@@ -67,16 +68,16 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
         ImageLoader imageLoader = ImageLoader.getInstance();
 
         // Open database
-        status("Opening database");
+        status("Loading");
         deviceImagesIndex = activity.openDatabase();
 
         // Load hash table into map
-        status("Loading hash table");
+        //status("Loading hash table");
         Map<String, ImageProfile> hashTable = deviceImagesIndex.getHashTable();
         int hashTableSize = hashTable.size();
 
         // Get hash of target image
-        status("Hashing target image");
+        //status("Hashing target image");
         Hash targetHash = AndroidCodec.hashFromUriString(targetUriString);
         long targetModifiedDate = FileValidator.getLastModifiedDateUri(targetUriString);
 /*
@@ -142,6 +143,9 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
         int missingIndicesCount = missingIndices.size();
         int missingIndicesIterator = 1;
 
+        ProgressStopwatch stopwatch = new ProgressStopwatch();
+        String estimatedMinutesSeconds = "";
+
         // Loop through files that haven't been indexed yet
         for (String imageFilePath: missingIndices)
         {
@@ -150,7 +154,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
                 return ReturnCode.SEARCH_CANCELLED;
 
             // Report progress to waiting fragment
-            status("Indexing " + missingIndicesIterator++ + " of " + missingIndicesCount);
+            status("Indexing " + missingIndicesIterator++ + " of " + missingIndicesCount + estimatedMinutesSeconds);
 
             // Load bitmap to be hashed and indexed
             Bitmap bitmap = imageLoader.loadImageSync(AndroidCodec.decodedUriStringFromFilePathString(imageFilePath));
@@ -190,6 +194,8 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
                 else
                     activity.displayGridFragment();
             }
+
+            estimatedMinutesSeconds = " (" + stopwatch.estimateMinutesSeconds(missingIndicesIterator, missingIndicesCount) + " left)";
         }
 
         // Check if no images were found
@@ -238,7 +244,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             @Override
             public void run()
             {
-                Log.d(TAG, "setting status " + text);
+                //Log.d(TAG, "setting status " + text);
                 statusTextView.setText(text);
             }
         }
@@ -278,7 +284,8 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             // Close splash screen after hash has been fetched and browser intent sent
             case SEARCH_COMPLETED_WITH_NO_ERROR:
                 //activity.displayGridFragment();
-                activity.hideStatusBar();
+                //activity.hideStatusBar();
+                status("Search complete");
                 break;
 
             // Report that no images were found
