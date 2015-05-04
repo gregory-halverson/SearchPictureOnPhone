@@ -14,6 +14,7 @@ import halverson.gregory.reverseimagesearch.searchpictureonphone.thread.SearchJo
 public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 {
     // Fragment
+    LiveWaitingScreenFragment waitingScreenFragment;
     LiveDisplayGridFragment gridFragment;
 
     // Thread
@@ -28,6 +29,7 @@ public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_search_image_on_phone);
 
+        waitingScreenFragment = new LiveWaitingScreenFragment();
         gridFragment = new LiveDisplayGridFragment();
 
         if (savedInstanceState == null)
@@ -52,8 +54,14 @@ public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 
     public void searchOnPhoneWaitingFragment()
     {
+        /*
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, new LiveWaitingScreenFragment())
+                .commit();
+        */
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, waitingScreenFragment)
                 .commit();
     }
 
@@ -73,7 +81,14 @@ public class LiveSearchImageOnPhoneActivity extends ActionBarActivity
 
     public void hideStatusBar()
     {
-        gridFragment.hideStatusBar();
+        if (gridFragment != null)
+            gridFragment.hideStatusBar();
+    }
+
+    public void hideSpinner()
+    {
+        if (waitingScreenFragment != null)
+            waitingScreenFragment.hideSpinner();
     }
 
     public DeviceImagesIndex getDeviceImagesIndex()

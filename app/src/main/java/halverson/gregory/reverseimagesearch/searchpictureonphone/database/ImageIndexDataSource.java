@@ -55,12 +55,14 @@ public class ImageIndexDataSource
     {
         // Generate query
         ContentValues values = new ContentValues();
-        values.put(ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME, "\'" + imagePathString.replace("\'", "\'\'") + "\'");
+        //values.put(ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME, "\'" + imagePathString.replace("\'", "\'\'") + "\'");
+        //values.put(ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME, "\'" + DatabaseUtils.sqlEscapeString(imagePathString));
+        values.put(ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME, imagePathString);
         values.put(ImageIndexSQLiteHelper.AVERAGE_HASH_UPPER_COLUMN_NAME, averageHash.getUpper());
         values.put(ImageIndexSQLiteHelper.AVERAGE_HASH_LOWER_COLUMN_NAME, averageHash.getLower());
         values.put(ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME, fileModifiedDate);
 
-        //Log.d(TAG, "values " + values.toString());
+        Log.d(TAG, "values " + values.toString());
 
         // Execute query and return id number
         return database.insert(ImageIndexSQLiteHelper.TABLE_NAME, null, values);
@@ -76,10 +78,7 @@ public class ImageIndexDataSource
     // Returns true if entry containing image uri string exists, false if not
     public boolean entryExists(String imageFilePath, Long fileModifiedDate)
     {
-        // Generate query
-        String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=\'" + imageFilePath.replace("\'", "\'\'") + "\'";
-        String fileDateModifiedQuery = ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME +  "=" + fileModifiedDate;
-        String whereQuery = imagePathQuery + " AND " + fileDateModifiedQuery;
+        String whereQuery = buildFileNameAndDateQuery(imageFilePath);
 
         //Log.d(TAG, "checking where " + whereQuery);
 
@@ -102,12 +101,7 @@ public class ImageIndexDataSource
 
     public ImageProfile get(String imageFilePath)
     {
-        // Generate query
-        File file = new File(imageFilePath);
-        Long fileModifiedDate = file.lastModified();
-        String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=\'" + imageFilePath.replace("\'", "\'\'") + "\'";
-        String fileDateModifiedQuery = ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME +  "=" + fileModifiedDate;
-        String whereQuery = imagePathQuery + " AND " + fileDateModifiedQuery;
+        String whereQuery = buildFileNameAndDateQuery(imageFilePath);
 
         //Log.d(TAG, "checking where " + whereQuery);
 
@@ -135,12 +129,7 @@ public class ImageIndexDataSource
     // Returns hash object from records associated with given file path
     public Hash getHash(String imageFilePath)
     {
-        // Generate query
-        File file = new File(imageFilePath);
-        Long fileModifiedDate = file.lastModified();
-        String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=\'" + imageFilePath.replace("\'", "\'\'") + "\'";
-        String fileDateModifiedQuery = ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME +  "=" + fileModifiedDate;
-        String whereQuery = imagePathQuery + " AND " + fileDateModifiedQuery;
+        String whereQuery = buildFileNameAndDateQuery(imageFilePath);
 
         //Log.d(TAG, "checking where " + whereQuery);
 
@@ -202,6 +191,16 @@ public class ImageIndexDataSource
     public long getEntryCount()
     {
         return DatabaseUtils.queryNumEntries(database, ImageIndexSQLiteHelper.TABLE_NAME);
+    }
+
+    private String buildFileNameAndDateQuery(String imageFilePath)
+    {
+        File file = new File(imageFilePath);
+        Long fileModifiedDate = file.lastModified();
+        //String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=\'" + imageFilePath.replace("\'", "\'\'") + "\'";
+        String imagePathQuery = ImageIndexSQLiteHelper.IMAGE_PATH_COLUMN_NAME + "=" + DatabaseUtils.sqlEscapeString(imageFilePath);
+        String fileDateModifiedQuery = ImageIndexSQLiteHelper.FILE_MODIFIED_DATE_COLUMN_NAME +  "=" + fileModifiedDate;
+        return imagePathQuery + " AND " + fileDateModifiedQuery;
     }
 
     // Cursor attribute getters

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -26,6 +27,7 @@ public class LiveWaitingScreenFragment extends Fragment
 
     TextView statusText;
     ImageView imageView;
+    ProgressBar spinner;
 
     public LiveWaitingScreenFragment() { }
 
@@ -41,6 +43,7 @@ public class LiveWaitingScreenFragment extends Fragment
         view = inflater.inflate(R.layout.fragment_live_waiting_screen, container, false);
 
         statusText = (TextView) view.findViewById(R.id.liveStatusText);
+        spinner = (ProgressBar) view.findViewById(R.id.liveSpinner);
 
         // Load intent
         Intent intent = activity.getIntent();
@@ -65,5 +68,11 @@ public class LiveWaitingScreenFragment extends Fragment
     public void setStatusText(String text)
     {
         statusText.setText(text);
+    }
+
+    public void hideSpinner()
+    {
+        if (spinner != null)
+            spinner.setVisibility(View.INVISIBLE);
     }
 }

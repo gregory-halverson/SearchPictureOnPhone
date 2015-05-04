@@ -126,6 +126,22 @@ public class DeviceImagesIndex
         return listOfMissingIndices;
     }
 
+    public ArrayList<String> getListOfMissingIndicesTestSet()
+    {
+        ArrayList<String> listOfMissingIndices = new ArrayList<String>();
+
+        ArrayList<String> completeList = getTestSet();
+
+        for (String imageFilePath: completeList)
+            if (!indexExists(imageFilePath))
+            {
+                Log.d(TAG, "Queueing path " + imageFilePath);
+                listOfMissingIndices.add(imageFilePath);
+            }
+
+        return listOfMissingIndices;
+    }
+
     public Hash getHash(String filePath)
     {
         return dataSource.getHash(filePath);

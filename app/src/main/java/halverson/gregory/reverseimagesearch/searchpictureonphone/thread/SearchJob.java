@@ -1,7 +1,10 @@
 package halverson.gregory.reverseimagesearch.searchpictureonphone.thread;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -15,6 +18,7 @@ import java.util.Map;
 
 import halverson.gregory.image.AndroidCodec;
 import halverson.gregory.image.hash.Hash;
+import halverson.gregory.image.hash.ImageHash;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.activity.LiveSearchImageOnPhoneActivity;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.DeviceImagesIndex;
 import halverson.gregory.reverseimagesearch.searchpictureonphone.database.FileValidator;
@@ -84,7 +88,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 */
         boolean gridFragmentDisplayed = false;
 
-        int i = 1;
+        int indexedImagesIterator = 1;
 
         // Loop through all hashes in database
         for (String imageFilePath: hashTable.keySet())
@@ -94,7 +98,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
                 return ReturnCode.SEARCH_CANCELLED;
 
             // Report progress to waiting fragment
-            status("Searching " + i++ + " of " + hashTableSize);
+            status("Searching " + indexedImagesIterator++ + " of " + hashTableSize);
 
             // Skip if file doesn't exist
             if (!FileValidator.checkFilePath(imageFilePath))
@@ -109,6 +113,56 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
 
             // Calculate hamming distance between target image and queried image
             int hammingDistance = Hash.hammingDistance(targetHash, imageProfile.averageHash);
+            //Log.d(TAG, "hamming(" + targetHash.toHexString() + ", " + imageProfile.averageHash.toHexString() + "): " + hammingDistance + " for " + imageFilePath);
+
+            // Include in search results if the hamming distance is less than the cutoff
+            if (hammingDistance < DeviceImagesIndex.AVERAGE_HAMMING_DISTANCE_CUTOFF)
+            {
+                // Add to hamming distances
+                hammingDistances.put(imageFilePath, hammingDistance);
+
+                // Sort results by hamming distance
+                deviceImagesIndex.setSearchResultsList(sortSearchResults(hammingDistances));
+
+                // Display results
+                if (gridFragmentDisplayed)
+                    notifyAdapter();
+                else
+                    activity.displayGridFragment();
+            }
+        }
+
+        // Search of previously indexed images complete, update database
+
+        status("Looking for new pictures");
+
+        // List of missing indices
+        ArrayList<String> missingIndices = deviceImagesIndex.getListOfMissingIndicesTestSet();
+        int missingIndicesCount = missingIndices.size();
+        int missingIndicesIterator = 1;
+
+        // Loop through files that haven't been indexed yet
+        for (String imageFilePath: missingIndices)
+        {
+            // Check if thread is cancelled
+            if (isCancelled())
+                return ReturnCode.SEARCH_CANCELLED;
+
+            // Report progress to waiting fragment
+            status("Indexing " + missingIndicesIterator++ + " of " + missingIndicesCount);
+
+            // Generate new hash
+            Bitmap bitmap = imageLoader.loadImageSync(AndroidCodec.decodedUriStringFromFilePathString(imageFilePath));
+            Hash generatedHash = ImageHash.Average.hashFromBitmap(bitmap);
+
+            // Store successful hash in the database
+            if (generatedHash != null)
+                deviceImagesIndex.createIndex(imageFilePath, generatedHash);
+            else
+                continue;
+
+            // Calculate hamming distance between target image and queried image
+            int hammingDistance = Hash.hammingDistance(targetHash, generatedHash);
             //Log.d(TAG, "hamming(" + targetHash.toHexString() + ", " + imageProfile.averageHash.toHexString() + "): " + hammingDistance + " for " + imageFilePath);
 
             // Include in search results if the hamming distance is less than the cutoff
@@ -220,6 +274,7 @@ public class SearchJob extends AsyncTask<Void, Void, SearchJob.ReturnCode>
             // Report that no images were found
             case NO_IMAGES_FOUND:
                 status("No similar images found on device");
+                activity.hideSpinner();
                 break;
 
             // Clear memory
